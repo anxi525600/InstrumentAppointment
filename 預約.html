@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>儀器預約</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link rel="shortcut icon" href="http://www.rdo.fju.edu.tw/sites/all/themes/ord_1/favicon.ico"
+    type="image/vnd.microsoft.icon" />
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap"
+        rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+    <link href="assets/vendor/aos/aos.css" rel="stylesheet">
+    <link href="assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="assets/vendor/glightbox/css/glightbox.min.css" rel="stylesheet">
+    <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.css" rel="stylesheet">
+
+    <!-- Main CSS File -->
+    <link href="assets/css/main.css" rel="stylesheet">
+
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.14/locales/zh-cn.js"></script>
+
+    <script type='importmap'>
+        {
+            "imports": {
+                "@fullcalendar/core": "https://cdn.skypack.dev/@fullcalendar/core@6.1.14",
+                "@fullcalendar/daygrid": "https://cdn.skypack.dev/@fullcalendar/daygrid@6.1.14",
+                "@fullcalendar/timegrid": "https://cdn.skypack.dev/@fullcalendar/timegrid@6.1.14",
+                "@fullcalendar/interaction": "https://cdn.skypack.dev/@fullcalendar/interaction@6.1.14"
+            }
+            
+        }
+    </script>
+    <script type='module'>
+        import { Calendar } from '@fullcalendar/core'
+        import dayGridPlugin from '@fullcalendar/daygrid'
+        import timeGridPlugin from '@fullcalendar/timegrid'
+        import interactionPlugin from '@fullcalendar/interaction'
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar')
+            const calendar = new Calendar(calendarEl, {
+                plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                locale: 'zh-cn',
+                events: [
+                    {
+                        title: '蔡老師',
+                        start: '2024-06-12T09:00:00',
+                        end: '2024-06-12T12:00:00'
+                    },
+                    {
+                        title: '王老師',
+                        start: '2024-06-15T14:00:00',
+                        end: '2024-06-15T17:00:00'
+                    },
+                    {
+                        title: '李老師',
+                        start: '2024-06-20T10:30:00',
+                        end: '2024-06-20T13:30:00'
+                    },
+                    {
+                        title: '陳老師',
+                        start: '2024-06-25T16:00:00',
+                        end: '2024-06-25T19:00:00'
+                    },
+                    {
+                        title: '張老師',
+                        start: '2024-06-05T08:00:00',
+                        end: '2024-06-05T11:00:00'
+                    },
+                    {
+                        title: '劉老師',
+                        start: '2024-06-10T13:30:00',
+                        end: '2024-06-10T16:30:00'
+                    },
+                    {
+                        title: '吳老師',
+                        start: '2024-06-18T15:00:00',
+                        end: '2024-06-18T18:00:00'
+                    },
+                    {
+                        title: '林老師',
+                        start: '2024-06-22T11:00:00',
+                        end: '2024-06-22T14:00:00'
+                    }
+                ],
+                navLinks: true,
+                navLinkDayClick: function (date, jsEvent) {
+                    console.log('day', date.toISOString());
+                    console.log('coords', jsEvent.pageX, jsEvent.pageY);
+                    calendar.changeView('timeGridDay', date);
+                },
+                selectable: true,
+                selectMirror: true,
+                selectMinDistance: 0,
+                selectLongPressDelay: 100,
+                editable: true,
+                selectHelper: true,
+                select: function (info) {
+                    const title = prompt('新事件的標題:');
+                    const endTitle = prompt('請選擇結束時間 (格式: YYYY-MM-DDTHH:mm):');
+                    if (title && endTitle) {
+                        const endDate = new Date(endTitle);
+                        if (endDate > info.start) {
+                            calendar.addEvent({
+                                title: title,
+                                start: info.start,
+                                end: endDate,
+                                allDay: false
+                            })
+                        } else {
+                            alert('結束時間必須晚於開始時間！');
+                        }
+                    }
+                    calendar.unselect();
+                }
+            })
+            calendar.render()
+
+            let adminMode = false;
+            let originalEventClick = calendar.getOption('eventClick');
+
+            document.getElementById('adminModeBtn').addEventListener('click', function () {
+                adminMode = !adminMode;
+
+                if (adminMode) {
+                    calendar.setOption('eventClick', function (info) {
+                        if (confirm('確定要刪除這個事件嗎?')) {
+                            info.event.remove();
+                        }
+                    });
+                    this.textContent = '關閉管理者模式';
+                    alert('管理者模式已啟用');
+                } else {
+                    calendar.setOption('eventClick', originalEventClick);
+                    this.textContent = '啟用管理者模式';
+                    alert('管理者模式已關閉');
+                }
+            });
+        })
+    </script>
+
+
+
+    <!-- bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+
+
+    <!-- =======================================================
+  * Template Name: Logis
+  * Template URL: https://bootstrapmade.com/logis-bootstrap-logistics-website-template/
+  * Updated: Jun 06 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="service-details-page">
+    <header id="header" class="header d-flex align-items-center fixed-top">
+        <div class="container-fluid container-xl position-relative d-flex align-items-center">
+
+            <a href="index.html" class="logo d-flex align-items-center me-auto">
+                <!-- Uncomment the line below if you also wish to use an image logo -->
+                <!-- <img src="assets/img/logo.png" alt=""> -->
+                <img src="https://spark.fju.edu.tw/sites/default/files/homepage_logo/logo-fju-2020.png"
+                    class="img-fluid mb-3 mb-lg-0" alt="">
+            </a>
+
+            <nav id="navmenu" class="navmenu">
+                <ul>
+                    <li><a href="index.html">首頁<br></a></li>
+                    <li><a href="guidance.html">引導</a></li>
+                    <li><a href="announcement.html">公告</a></li>
+                    <li><a href="./重要儀器查詢.html"  class="active">儀器預約</a></li>
+                    <li class="dropdown"><a href="#"><span>個人介面</span> <i
+                                class="bi bi-chevron-down toggle-dropdown"></i></a>
+                        <ul>
+                            <li><a href="user_info.html">個人資料</a></li>
+                            <li><a href="reserve.html">我的預約</a></li>
+                            <li><a href="notify.html">通知</a></li>
+                            <li><a href="feedback.html">反饋</a></li>
+                            <li><a href="./待付款項目.html">待付款項目</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="./繳費問題.html">幫助</a></li>
+                    <li><a href="./contact.html">聯繫我們</a></li>
+                    <li><a href="./管理預約.html">管理者</a></li>
+                </ul>
+                <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+            </nav>
+
+            <a class="btn-getstarted" href="login.html">登入</a>
+
+        </div>
+    </header>
+
+
+    <main class="main">
+
+        <!-- Page Title -->
+        <div class="page-title" data-aos="fade" style="background-image: url(assets/img/world-dotted-map.png);">
+            <div class="container position-relative">
+                <h1>儀器預約</h1>
+                <nav class="breadcrumbs">
+                    <ol>
+                        <li><a href="index.html">Home</a></li>
+                        <li class="current">儀器預約</li>
+                    </ol>
+                </nav>
+            </div>
+        </div><!-- End Page Title -->
+
+
+
+        <!-- Service Details Section -->
+        <section id="service-details" class="service-details section">
+
+            <div class="container">
+
+                <div class="row gy-4">
+
+                    <div class="col-lg-12" data-aos="fade-up" data-aos-delay="100">
+                        <div class="container" data-aos="fade-up" data-aos-delay="100"
+                            style="display: flex;justify-content: end;">
+                            <button id="adminModeBtn" class="btn btn-danger mt-3">啟用管理者模式</button>
+                        </div>
+                        <div id="calendar" style="margin-top: 20px;"></div>
+                    </div>
+
+                </div>
+                <div class="text-center mt-4" data-aos="fade-up" data-aos-delay="100">
+                    <button id="saveChangesBtn" class="btn btn-primary">提交</button>
+                </div>
+                <div id="successMessage" class="alert alert-success mt-4" style="display: none;">提交成功！</div>
+            </div>
+        </section><!-- /Service Details Section -->
+
+
+    </main>
+    <script>
+        document.getElementById('saveChangesBtn').addEventListener('click', function () {
+            document.getElementById('successMessage').style.display = 'block';
+            setTimeout(function () {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 3000);
+        });
+    </script>
+
+    <footer id="footer" class="footer">
+
+        <div class="container footer-top">
+            <div class="row gy-4">
+                <div class="col-lg-5 col-md-12 footer-about">
+                    <a href="index.html" class="logo d-flex align-items-center">
+                        <span class="sitename">輔仁大學貴重儀器借用系統</span><br><br>
+                    </a>
+                    <div class="social-links d-flex mt-4">
+                        <a href=""><i class="bi bi-twitter-x"></i></a>
+                        <a href=""><i class="bi bi-facebook"></i></a>
+                        <a href=""><i class="bi bi-instagram"></i></a>
+                        <a href=""><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2 col-6 footer-links">
+                    <h4>功能</h4>
+                    <ul>
+                        <li><a href="./index.html">首頁</a></li>
+                        <li><a href="./guidance.html">引導</a></li>
+                        <li><a href="./重要儀器查詢.html">儀器預約</a></li>
+                        <li><a href="./user_info.html">個人介面</a></li>
+                        <li><a href="./註冊問題.html">常見問題</a></li>
+                        <li><a href="./contact.html">聯絡我們</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
+                    <h4>聯絡我們</h4>
+                    <p>輔仁大學</p>
+                    <p>242新北市新莊區中正路510號</p>
+                    <p class="mt-4"><strong>Phone:</strong> <span>0229052000</span></p>
+                    <p><strong>Email:</strong> <span>rdo@mail.fju.edu.tw</span></p>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="container copyright text-center mt-4">
+            <p>© <span>Copyright</span> <strong class="px-1 sitename">Logis</strong> <span>All Rights Reserved</span>
+            </p>
+            <div class="credits">
+                <!-- All the links in the footer should remain intact. -->
+                <!-- You can delete the links only if you've purchased the pro version. -->
+                <!-- Licensing information: https://bootstrapmade.com/license/ -->
+                <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
+                Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+            </div>
+        </div>
+
+    </footer>
+
+
+    <!-- Scroll Top -->
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+            class="bi bi-arrow-up-short"></i></a>
+
+    <!-- Preloader -->
+    <div id="preloader"></div>
+
+    <!-- Vendor JS Files -->
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/php-email-form/validate.js"></script>
+    <script src="assets/vendor/aos/aos.js"></script>
+    <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+    <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+
+    <!-- Main JS File -->
+    <script src="assets/js/main.js"></script>
+
+</body>
+
+</html>

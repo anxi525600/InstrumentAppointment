@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@fullcalendar/core": "^6.1.14",
+    "@fullcalendar/timegrid": "^6.1.14"
+  },
+  "devDependencies": {
+    "html-loader": "^5.0.0"
+  }
+}
